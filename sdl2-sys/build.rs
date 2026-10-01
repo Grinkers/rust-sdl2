@@ -133,6 +133,17 @@ fn compile_sdl2(sdl2_build_path: &Path, target_os: &str) -> PathBuf {
         }
     }
 
+    if env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+        let static_crt = env::var("CARGO_CFG_TARGET_FEATURE")
+            .unwrap_or_default()
+            .split(',')
+            .any(|feature| feature == "crt-static");
+        cfg.define(
+            "SDL_FORCE_STATIC_VCRT",
+            if static_crt { "ON" } else { "OFF" },
+        );
+    }
+
     if target_os == "windows-gnu" {
         cfg.define("VIDEO_OPENGLES", "OFF");
     }
